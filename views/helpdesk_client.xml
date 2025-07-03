@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_custom_client_tree" model="ir.ui.view">
+        <field name="name">helpdesk.custom.client.tree</field>
+        <field name="model">helpdesk.custom.client</field>
+        <field name="arch" type="xml">
+            <list string="Clientes">
+                <field name="name" string="Cliente"/>
+                <field name="country" string="País"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista formulario para helpdesk.custom.client -->
+    <record id="view_helpdesk_custom_client_form" model="ir.ui.view">
+        <field name="name">helpdesk.custom.client.form</field>
+        <field name="model">helpdesk.custom.client</field>
+        <field name="arch" type="xml">
+            <form string="Cliente">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="country"/>
+                    </group>
+                    <notebook>
+                        <page string="Contactos">
+                            <field name="partner_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <!-- Sección de socios relacionados -->
+                    
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción de ventana para mostrar la vista de lista -->
+    <record id="action_helpdesk_custom_client_view" model="ir.actions.act_window">
+        <field name="name">Clientes</field>
+        <field name="res_model">helpdesk.custom.client</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_helpdesk_custom_client_tree"/>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Item de menú (opcional) -->
+    <menuitem id="menu_helpdesk_custom_client" name="Lista de Clientes" parent="helpdesk.helpdesk_menu_config" action="action_helpdesk_custom_client_view" sequence="10"/>
+</odoo>

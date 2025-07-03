@@ -20,7 +20,9 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['helpdesk'],
-    'data':[],
-    
+    'depends': ['helpdesk','base'],
+    'data':['views/helpdesk.xml',
+           'security/ir.model.access.csv',
+            'views/helpdesk_client.xml',
+            'views/res_partner.xml'],
 }

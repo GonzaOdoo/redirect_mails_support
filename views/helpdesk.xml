@@ -1,0 +1,16 @@
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form.inherit</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campos después del partner_id -->
+            <xpath expr="//field[@name='partner_id']/.." position="after">
+                <group>
+                    <field name="country" />
+                    <field name="related_client" string="Cliente"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
