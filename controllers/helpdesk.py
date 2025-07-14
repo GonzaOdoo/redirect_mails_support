@@ -36,10 +36,10 @@ class WebsiteHelpdesk(WebsiteHelpdesk):
                 redirect_url += '/knowledgebase'
             elif kwargs.get('contact_form'):
                 redirect_url += '/?contact_form=1'
-            return redirect(redirect_url)
+            return request.redirect(redirect_url)
 
         if team.show_knowledge_base and not kwargs.get('contact_form'):
-            return redirect(team.website_url + '/knowledgebase')
+            return request.redirect(team.website_url + '/knowledgebase')
 
         result = self.get_helpdesk_team_data(team or teams[0], search=search)
         result['multiple_teams'] = len(teams) > 1
