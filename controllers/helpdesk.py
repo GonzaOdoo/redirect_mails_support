@@ -72,10 +72,16 @@ class WebsiteForm(WebsiteForm):
 
     def insert_record(self, request, model, values, custom, meta=None):
         # Llamamos al original para crear el ticket
-        _logger.info(f"REQUEST: {request}")
-        _logger.info("VALORES DEL FORMULARIO: %s", values)
-        _logger.info("CUSTOM CONTENT: %s", custom)
-        _logger.info("META DATA: %s", meta)
+        # Si es un ticket de helpdesk, procesamos aquí
+        if model.sudo().model == 'helpdesk.ticket':
+            user = request.env.user
+            cliente = False
+            if user and user.partner_id:
+                cliente = user.partner_id  # o lo que corresponda
+    
+            if cliente:
+                # Asignamos partner_id antes de crear el registro
+                values['partner_id'] = cliente.id
         res = super().insert_record(request, model, values, custom, meta=meta)
 
         # Verificamos que sea un ticket de helpdesk
