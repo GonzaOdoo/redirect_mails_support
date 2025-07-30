@@ -94,10 +94,9 @@ class WebsiteForm(WebsiteForm):
         default_field = model.website_form_default_field_id
         _logger.info(default_field.name)
         if default_field:
-            custom_label = Markup("<h4>%s</h4>" % _("Other Information"))
+            custom_label = Markup("<h4>%s</h4>" % _("Otra información"))
             default_field_data = values.get(default_field.name, '')
-            default_content = Markup("<h4>%s</h4><p>%s</p>") % (
-                default_field.name.capitalize(),
+            default_content = Markup("<h4>Descripción</h4><p>%s</p>") % (
                 html2plaintext(default_field_data)
             ) if default_field_data else ''
 
