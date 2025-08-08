@@ -8,6 +8,7 @@
             <!-- Inserta tu campo donde quieras -->
             <xpath expr="//field[@name='category_id']" position="after">
                 <field name="support_client_id"/>
+                <field name="is_manager"/>
             </xpath>
         </field>
     </record>
