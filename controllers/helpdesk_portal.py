@@ -2,7 +2,8 @@
 from operator import itemgetter
 
 from markupsafe import Markup
-from odoo import http, _
+from odoo import http, tools, _, SUPERUSER_ID
+from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.addons.helpdesk.controllers.portal import CustomerPortal
 from odoo.http import request
 from odoo.osv.expression import AND, FALSE_DOMAIN
@@ -119,3 +120,66 @@ class CustomerPortalExtended(CustomerPortal):
             'filterby': filterby,
         })
         return values
+
+
+    @http.route([
+        "/helpdesk/ticket/<int:ticket_id>",
+        "/helpdesk/ticket/<int:ticket_id>/<access_token>",
+        '/my/ticket/<int:ticket_id>',
+        '/my/ticket/<int:ticket_id>/<access_token>'
+    ], type='http', auth="public", website=True)
+    def tickets_followup(self, ticket_id=None, access_token=None, **kw):
+        try:
+            ticket_sudo = self._document_check_access_ticket('helpdesk.ticket', ticket_id, access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        values = self._ticket_get_page_view_values(ticket_sudo, access_token, **kw)
+        return request.render("helpdesk.tickets_followup", values)
+
+
+
+    def _document_check_access_ticket(self, model_name, document_id, access_token=None):
+        """Check if current user is allowed to access the specified record.
+    
+        :param str model_name: model of the requested record
+        :param int document_id: id of the requested record
+        :param str access_token: record token to check if user isn't allowed to read requested record
+        :return: expected record, SUDOED, with SUPERUSER context
+        :raise MissingError: record not found in database, might have been deleted
+        :raise AccessError: current user isn't allowed to read requested document (and no valid token was given)
+        """
+        
+        # Obtener el documento y verificar que exista
+        document = request.env[model_name].sudo().browse(document_id)
+        document_sudo = document.with_user(SUPERUSER_ID).exists()
+        if not document_sudo:
+            raise MissingError(_("This document does not exist."))
+        
+        # Obtener el partner del usuario actual
+        partner = request.env.user.partner_id
+
+        # Verificar acceso basado en rol y relación con cliente
+        try:
+            # Si el usuario es manager, verificar que el documento pertenezca a su cliente asignado
+            if partner and partner.is_manager and document.related_client:
+                if document.related_client.id == partner.support_client_id.id:
+                    # Acceso permitido por pertenencia
+                    _logger.info("Access granted to manager for related client.")
+                else:
+                    # No pertenece, verificar acceso normal
+                    document.check_access('read')
+            else:
+                # Usuario normal o sin rol especial: verificar acceso
+                document.check_access('read')
+                
+        except AccessError:
+            # Si no tiene acceso, intentar con token
+            if not access_token or not document_sudo.access_token:
+                raise AccessError(_("Access denied. No valid token provided."))
+            if not consteq(document_sudo.access_token, access_token):
+                raise AccessError(_("Access denied. Invalid or expired token."))
+        
+        # Retornar el documento con privilegios de superusuario
+        return document_sudo
+    
